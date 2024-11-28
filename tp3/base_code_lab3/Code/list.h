@@ -28,6 +28,9 @@ typedef struct s_List List;
 /** Définition of type ptrList : pointer to a List.
 */
 typedef List* ptrList;
+/** Définition of type SubList : sublist of a List.
+*/
+typedef struct s_SubList SubList;
 /** @}*/
 
 /*-----------------------------------------------------------------*/
@@ -180,6 +183,8 @@ List* list_map(List* l, ListFunctor f, void* environment);
  @note This function acts by side effect on the parameter l. The returned value is the same as the parameter l that is modified by the function.
 */
 List* list_sort(List* l, OrderFunctor f);
+
+void print_sublist(SubList l);
 
 /** @}*/
 
