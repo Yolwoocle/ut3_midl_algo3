@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-std=c99 -Wextra -Wall -Werror -pedantic -fsanitize=address
-LDFLAGS=-lm -fsanitize=address
+CFLAGS=-std=c99 -Wextra -Wall -Werror -pedantic #-fsanitize=address
+LDFLAGS=-lm
 
 ECHO = @
 ifeq ($(VERBOSE),1)

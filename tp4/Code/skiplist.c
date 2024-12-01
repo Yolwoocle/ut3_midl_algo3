@@ -102,34 +102,85 @@ void skiplist_map(const SkipList* d, ScanOperator f, void* user_data) {
 }
 
 
+void print_node(Node* node, void* env) {
+	(void)env;
+	printf("[%d]:\n", node->value);
+	for (int i = 0; i < node->nb_links; i++) {
+		printf("- (%d): ", i);
+		if (node->links[i].prev != NULL) {
+			printf("[%d]", node->links[i].prev->value);
+		}
+		else {
+			printf("[NULL]");
+		}
+		if (node->links[i].next != NULL) {
+			printf(" <-> [%d]\n", node->links[i].next->value);
+		}
+		else {
+			printf(" <-> [NULL]\n");
+
+		}
+	}
+}
+
+
 SkipList* skiplist_insert(SkipList* d, int value) {
-	int nb_links = rng_get_value(&(d->rng));
+	int nb_links = rng_get_value(&(d->rng)) + 1;
+	Node** nodes_to_connect = malloc(sizeof(Node*) * d->nb_levels);
 
 	Node* new_node = node_create(nb_links);
 	new_node->value = value;
 
 	Node* node = d->sentinel;
-	int i_link = node->nb_links - 1; // = ??? 
-	Link link = node->links[i_link];
-	
-	while (node != NULL && i_link > 0) {
-		i_link = node->nb_links - 1;
-		link = node->links[i_link];
-		while (i_link > 0 && link.next == NULL && link.next->value > value) {
-			link = node->links[i_link];
-			i_link++;
-		}
+	int i_link = node->nb_links - 1;
 
-		if (i_link == 0) {
-			
-		} else {
-			node = link.next;
+	while (i_link >= 0) {
+		if (node->links[i_link].next == NULL || node->links[i_link].next->value > value) {
+			nodes_to_connect[i_link] = node;
+			i_link--;
+		}
+		else if (node->links[i_link].next->value < value) {
+			node = node->links[i_link].next;
+		}
+		else {
+			free(nodes_to_connect);
+			return d;
 		}
 	}
 
-	new_node->links[0].next = node->links[0].next;
-	new_node->links[0].prev = new_node;
-	node->links[0].next = new_node;
+	for (int i_node = 0; i_node < nb_links; i_node++) {
+		new_node->links[i_node].prev = new_node;
+		new_node->links[i_node].next = nodes_to_connect[i_node]->links[i_node].next;
+
+		nodes_to_connect[i_node]->links[i_node].next = new_node;
+	}
+
+	d->size++;
+	free(nodes_to_connect);
 
 	return d;
+}
+
+bool skiplist_search(const SkipList* d, int value, unsigned int* nb_operations) {
+	int i_link = d->nb_levels - 1;
+	Node* node = d->sentinel;
+	*nb_operations = 0;
+
+	while (i_link >= 0) {
+		Link link = node->links[i_link];
+		*nb_operations += 1;
+		printf("- %d\n", node->value);
+
+		if (link.next == NULL || link.next->value > value) {
+			i_link--;
+
+		} else if (link.next->value < value) {
+			node = link.next;
+
+		} else if (link.next->value == value) {
+			return true;
+
+		}
+	}
+	return false;
 }
