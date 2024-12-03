@@ -249,23 +249,30 @@ void test_search_iterator(int num){
 void test_remove(int num){
 	SkipList* list = buildlist(num);
 
-	FILE* values_file = fopen(gettestfilename("search", num), "r");
+	FILE* values_file = fopen(gettestfilename("remove", num), "r");
 	assert(values_file != NULL);
 	int nb_values = read_uint(values_file);
 
 	
 	for (int i = 0; i < nb_values; i++) {
 		int value = read_int(values_file);
-		
 		skiplist_remove(list, value);
 	}
 
 	printf("Skiplist (%d)\n", skiplist_size(list));
-	skiplist_map(list, print_elem, NULL);
+
+	SkipListIterator* iterator = skiplist_iterator_create((SkipList *) list, BACKWARD_ITERATOR);
+	for (skiplist_iterator_begin(iterator); !skiplist_iterator_end(iterator); iterator = skiplist_iterator_next(iterator)) {
+		int cur_value = skiplist_iterator_value(iterator);
+		printf("%d ", cur_value);
+	}
+	printf("\n");
+	skiplist_iterator_delete(&iterator);
 
 	fclose(values_file);
 	skiplist_delete(&list);
 	assert(list == NULL);
+	assert(iterator == NULL);
 }
 
 /** Function you ca use to generate dataset for testing.

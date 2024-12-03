@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug",
             "program": "${workspaceFolder}/Code/skiplisttest",
-            "args": ["-s", "1"],
+            "args": ["-r", "1"],
             "cwd": "${workspaceFolder}/Code"
         }
     ]

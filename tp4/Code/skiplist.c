@@ -6,6 +6,10 @@
 
 struct s_Node;
 
+#ifndef DEBUG_PRINT
+#define debug_print(...) printf(__VA_ARGS__)
+#endif
+
 typedef struct s_Link {
 	struct s_Node* prev;
 	struct s_Node* next;
@@ -49,9 +53,50 @@ void node_delete(Node** node) {
 }
 
 
-SkipList* skiplist_create(int nblevels) {
-	(void)nblevels;
+void print_node(Node* node, SkipList* list) {
 
+	if (node == list->sentinel) {
+		printf("- [SENTINEL]:\n");
+	} else {
+		printf("- [%d]:\n", node->value);
+	}
+	for (int i = node->nb_links-1; i >= 0; i--) {
+		printf("  - %d: ", i);
+		Node * prev = node->links[i].prev;
+		Node * next = node->links[i].next;
+		if (prev == list->sentinel) {
+			printf("[SENTINEL]");
+		} else if (prev != NULL) {
+			printf("[%d]", prev->value);
+		} else {
+			printf("[NULL]");
+		}
+		printf(" <-> ");
+		if (next == list->sentinel) {
+			printf("[SENTINEL]");
+		} else if (next != NULL) {
+			printf("[%d]", next->value);
+		} else {
+			printf("[NULL]");
+		}
+		printf("\n");
+	}
+}
+
+void print_list_verbose(SkipList* list) {
+	Node* node = list->sentinel;
+
+	printf("SkipList: len = %d\n", list->size);
+	do {
+		print_node(node, list);
+		node = node->links[0].next;
+	} while (node != list->sentinel);
+	printf("\n");
+}
+
+
+
+SkipList* skiplist_create(int nblevels) {
 	SkipList* list = malloc(sizeof(SkipList));
 	Node* sentinel = node_create(nblevels);
 
@@ -106,47 +151,6 @@ void skiplist_map(const SkipList* d, ScanOperator f, void* user_data) {
 }
 
 
-void print_node(Node* node, SkipList* list) {
-
-	if (node == list->sentinel) {
-		printf("[SENTINEL]:\n");
-	} else {
-		printf("[%d] ():\n", node->value);
-	}
-	for (int i = node->nb_links-1; i >= 0; i--) {
-		printf("- %d: ", i);
-		Node * prev = node->links[i].prev;
-		Node * next = node->links[i].next;
-		if (prev == list->sentinel) {
-			printf("[SENTINEL]");
-		} else if (prev != NULL) {
-			printf("[%d]", prev->value);
-		} else {
-			printf("[NULL]");
-		}
-		if (next == list->sentinel) {
-			printf(" <-> [SENTINEL]\n");
-		} else if (next != NULL) {
-			printf(" <-> [%d]\n", next->value);
-		} else {
-			printf(" <-> [NULL]\n");
-
-		}
-	}
-}
-
-void print_list_verbose(SkipList* list) {
-	Node* node = list->sentinel;
-
-	printf("SkipList: len = %d\n", list->size);
-	do {
-		print_node(node, list);
-		node = node->links[0].next;
-	} while (node != list->sentinel);
-	printf("\n");
-}
-
-
 SkipList* skiplist_insert(SkipList* d, int value) {
 	Node** nodes_to_connect = malloc(sizeof(Node*) * d->nb_levels);
 
@@ -186,7 +190,7 @@ SkipList* skiplist_insert(SkipList* d, int value) {
 	d->size++;
 	free(nodes_to_connect);
 
-	print_list_verbose(d);
+	// print_list_verbose(d);
 	return d;
 }
 
@@ -216,6 +220,7 @@ bool skiplist_search(const SkipList* d, int value, unsigned int* nb_operations) 
 	return false;
 }
 
+// Mon acienne version de skiplist_search, qui est correcte, mais ne renvoie pas le bon nb_operations.	 
 
 /*
 bool skiplist_search(const SkipList* d, int value, unsigned int* nb_operations) {
@@ -260,16 +265,24 @@ SkipList* skiplist_remove(SkipList* d, int value) {
 
 		}
 		else if (link.next->value == value) {
-			i_link = -1;
+			node = link.next;
+			i_link = -2;
 
 		}
+	}
+
+	// Value not found 
+	if (i_link != -2 || node == d->sentinel) {
+		return d;
 	}
 
 	for (int i = 0; i < node->nb_links; i++) {
 		Link* links = node->links;
 
 		links[i].prev->links[i].next = links[i].next;
+		links[i].next->links[i].prev = links[i].prev;
 	}
+	d->size--;
 	node_delete(&node);
 
 	return d;
@@ -306,7 +319,11 @@ void skiplist_iterator_delete(SkipListIterator** it) {
 
 
 SkipListIterator* skiplist_iterator_begin(SkipListIterator* it) {
-	it->position = it->list->sentinel->links[0].next;
+	if (it->direction == FORWARD_ITERATOR) {
+		it->position = it->list->sentinel->links[0].next;
+	} else {
+		it->position = it->list->sentinel->links[0].prev;
+	}
 	return it;
 }
 
@@ -317,7 +334,11 @@ bool skiplist_iterator_end(SkipListIterator* it) {
 
 
 SkipListIterator* skiplist_iterator_next(SkipListIterator* it) {
-	it->position = it->position->links[0].next;
+	if (it->direction == FORWARD_ITERATOR) {
+		it->position = it->position->links[0].next;
+	} else {
+		it->position = it->position->links[0].prev;
+	}
 	return it;
 }
 
