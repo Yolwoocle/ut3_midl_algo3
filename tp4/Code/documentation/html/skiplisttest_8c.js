@@ -5,6 +5,7 @@ var skiplisttest_8c =
     [ "read_int", "group___skip_list_test.html#ga7507b0dee4eaf8b4ebf8ef9076c7829f", null ],
     [ "read_uint", "group___skip_list_test.html#ga5d7c3722955bc5104ee767f1b9735e9d", null ],
     [ "buildlist", "group___skip_list_test.html#ga3359b4dfc792763b829c2677756b69e1", null ],
+    [ "print_elem", "group___skip_list_test.html#ga3a342a03148e986bc88c31db1b636734", null ],
     [ "test_construction", "group___skip_list_test.html#ga5686441c2d7b2f3166d058924361b91c", null ],
     [ "test_search", "group___skip_list_test.html#ga7e2503e0da905ac18be4cec220fc70a3", null ],
     [ "test_search_iterator", "group___skip_list_test.html#ga71dac4c3d169b38916119a55852cbe64", null ],

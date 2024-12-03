@@ -103,6 +103,8 @@ Functions</h2></td></tr>
 <tr class="separator:ga5d7c3722955bc5104ee767f1b9735e9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3359b4dfc792763b829c2677756b69e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___skip_list_a_t.html#ga4e18eee471590da1a1ee5af4d5b5e250">SkipList</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___skip_list_test.html#ga3359b4dfc792763b829c2677756b69e1">buildlist</a> (int num)</td></tr>
 <tr class="separator:ga3359b4dfc792763b829c2677756b69e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3a342a03148e986bc88c31db1b636734"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___skip_list_test.html#ga3a342a03148e986bc88c31db1b636734">print_elem</a> (int elem, void *env)</td></tr>
+<tr class="separator:ga3a342a03148e986bc88c31db1b636734"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5686441c2d7b2f3166d058924361b91c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___skip_list_test.html#ga5686441c2d7b2f3166d058924361b91c">test_construction</a> (int num)</td></tr>
 <tr class="separator:ga5686441c2d7b2f3166d058924361b91c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7e2503e0da905ac18be4cec220fc70a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___skip_list_test.html#ga7e2503e0da905ac18be4cec220fc70a3">test_search</a> (int num)</td></tr>
@@ -137,12 +139,12 @@ Functions</h2></td></tr>
 <p>Print a usage message for this program.</p>
 <div class="fragment"><div class="line">$skiplisttest -id num</div>
 <div class="line">where id is :</div>
-<div class="line">    c : construct and print the skiplist with data read from file ../Test/test_files/construct_num.txt</div>
-<div class="line">    s : construct the skiplist with data read from file ../Test/test_files/construct_num.txt and search elements from file test_files/search_num..txt</div>
-<div class="line">        Print statistics about the searches.</div>
-<div class="line">    i : construct the skiplist with data read from file ../Test/test_files/construct_num.txt and search, using an iterator, elements read from file test_files/search_num.txt</div>
-<div class="line">        Print statistics about the searches.</div>
-<div class="line">    r : construct the skiplist with data read from file test_files/construct_num.txt, remove values read from file test_files/remove_num.txt and print the list in reverse order</div>
+<div class="line">   c : construct and print the skiplist with data read from file ../Test/test_files/construct_num.txt</div>
+<div class="line">   s : construct the skiplist with data read from file ../Test/test_files/construct_num.txt and search elements from file test_files/search_num..txt</div>
+<div class="line">     Print statistics about the searches.</div>
+<div class="line">   i : construct the skiplist with data read from file ../Test/test_files/construct_num.txt and search, using an iterator, elements read from file test_files/search_num.txt</div>
+<div class="line">     Print statistics about the searches.</div>
+<div class="line">   r : construct the skiplist with data read from file test_files/construct_num.txt, remove values read from file test_files/remove_num.txt and print the list in reverse order</div>
 <div class="line"> </div>
 <div class="line">and num is the file number for input.</div>
 </div><!-- fragment --> 
@@ -183,7 +185,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>fileame in a relative form</dd></dl>
 <div class="fragment"><div class="line"><span class="keywordtype">char</span> *filename = <a class="code" href="group___skip_list_test.html#gacb6c555a7635b580eb67398d5162dd8f">gettestfilename</a>(<span class="stringliteral">&quot;construct&quot;</span>, 2);</div>
-<div class="ttc" id="agroup___skip_list_test_html_gacb6c555a7635b580eb67398d5162dd8f"><div class="ttname"><a href="group___skip_list_test.html#gacb6c555a7635b580eb67398d5162dd8f">gettestfilename</a></div><div class="ttdeci">char * gettestfilename(const char *action, int numtest)</div><div class="ttdef"><b>Definition:</b> skiplisttest.c:51</div></div>
+<div class="ttc" id="agroup___skip_list_test_html_gacb6c555a7635b580eb67398d5162dd8f"><div class="ttname"><a href="group___skip_list_test.html#gacb6c555a7635b580eb67398d5162dd8f">gettestfilename</a></div><div class="ttdeci">char * gettestfilename(const char *action, int numtest)</div><div class="ttdef"><b>Definition:</b> skiplisttest.c:52</div></div>
 </div><!-- fragment --><p> will set filename to</p><div class="fragment"><div class="line"><span class="stringliteral">&quot;../Test/test_files/construct_2.txt&quot;</span></div>
 </div><!-- fragment --> 
 </div>
@@ -240,6 +242,34 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Build a list corresponding to the fiven file number. </p>
+
+</div>
+</div>
+<a id="ga3a342a03148e986bc88c31db1b636734"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3a342a03148e986bc88c31db1b636734">&#9670;&nbsp;</a></span>print_elem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void print_elem </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>elem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>env</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
