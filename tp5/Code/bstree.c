@@ -9,10 +9,10 @@
 /*------------------------  BSTreeType  -----------------------------*/
 
 struct _bstree {
+    int key;
     BinarySearchTree* parent;
     BinarySearchTree* left;
     BinarySearchTree* right;
-    int key;
 };
 
 /*------------------------  BaseBSTree  -----------------------------*/
@@ -162,19 +162,87 @@ const BinarySearchTree* bstree_predecessor(const BinarySearchTree* t) {
     return NULL;
 }
 
-void bstree_swap_nodes(ptrBinarySearchTree* tree, ptrBinarySearchTree from, ptrBinarySearchTree to) {
-    assert(!bstree_empty(*tree) && !bstree_empty(from) && !bstree_empty(to));
-    (void)tree; (void)from; (void)to;
+void swap(BinarySearchTree** a, BinarySearchTree** b) {
+    BinarySearchTree* tmp = *a;
+    *a = *b;
+    *b = tmp;
 }
+
+
+void bstree_swap_nodes(ptrBinarySearchTree *tree, ptrBinarySearchTree from, ptrBinarySearchTree to) {
+    assert(!bstree_empty(*tree) && !bstree_empty(from) && !bstree_empty(to));
+
+    if (from == *tree)
+        *tree = to;
+    if (to == *tree)
+        *tree = from;
+
+    swap(&(from->parent), &(to->parent));
+
+    if (from->parent) {
+        if (from->parent->left == to)
+            from->parent->left = from;
+        else
+            from->parent->right = from;
+    } 
+
+    if (to->parent) {
+        if (to->parent->left == from)
+            to->parent->left = to;
+        else 
+            to->parent->right = to;
+    }
+
+    swap(&(from->left), &(to->left));
+    swap(&(from->right), &(to->right));
+
+    if (from->left) from->left->parent = from;
+    if (from->right) from->right->parent = from;
+    if (to->left) to->left->parent = to;
+    if (to->right) to->right->parent = to;
+}
+
 
 // t -> the tree to remove from, current -> the node to remove
 void bstree_remove_node(ptrBinarySearchTree* t, ptrBinarySearchTree current) {
     assert(!bstree_empty(*t) && !bstree_empty(current));
-    (void)t; (void)current;
+    
+    if (current->left == NULL && current->right == NULL) {
+        // Leaf node
+
+        if (current->parent->left == current) {
+            current->parent->left = NULL;
+        } else {
+            current->parent->right = NULL;
+        }
+        free(current);
+
+    } else if ((current->left == NULL && current->right != NULL) || (current->left != NULL && current->right == NULL)) {
+        // Only one child
+        if (current->left != NULL) {
+            bstree_swap_nodes(t, current, current->left);
+        } else {
+            bstree_swap_nodes(t, current, current->right);
+        }
+        bstree_remove_node(t, current);
+
+    } else {
+        // Two childs
+        BinarySearchTree* successor = (BinarySearchTree*) bstree_successor(current);
+        bstree_swap_nodes(t, current, successor);
+
+        bstree_remove_node(t, current);
+    }
 }
 
 void bstree_remove(ptrBinarySearchTree* t, int v) {
-    (void)t; (void)v;
+    BinarySearchTree* node = (BinarySearchTree*) bstree_search(*t, v);
+
+    if (node == NULL) {
+        return;
+    }
+
+    bstree_remove_node(t, node);
 }
 
 /*------------------------  BSTreeVisitors  -----------------------------*/
@@ -229,7 +297,20 @@ void bstree_iterative_breadth(const BinarySearchTree* t, OperateFunctor f, void*
 }
 
 void bstree_iterative_depth_infix(const BinarySearchTree* t, OperateFunctor f, void* environment) {
-    (void)t; (void)f; (void)environment;
+    if (t == NULL) {
+        return;
+    }
+
+    // Get the minimum node
+    BinarySearchTree* cursor = (BinarySearchTree*) t;
+    while (cursor->left != NULL) {
+        cursor = cursor->left;
+    }
+
+    while (cursor != NULL) {
+        f(cursor, environment);
+        cursor = (BinarySearchTree*) bstree_successor(cursor);
+    }
 }
 
 /*------------------------  BSTreeIterator  -----------------------------*/
@@ -247,20 +328,48 @@ struct _BSTreeIterator {
 
 /* minimum element of the collection */
 const BinarySearchTree* goto_min(const BinarySearchTree* e) {
-    (void)e;
-    return NULL;
+    if (e == NULL) {
+        return NULL;
+    }
+
+    BinarySearchTree* cursor = (BinarySearchTree*) e;
+    while (cursor->left != NULL) {
+        cursor = cursor->left;
+    }
+
+    return cursor;
 }
 
 /* maximum element of the collection */
 const BinarySearchTree* goto_max(const BinarySearchTree* e) {
-    (void)e;
-    return NULL;
+    if (e == NULL) {
+        return NULL;
+    }
+
+    BinarySearchTree* cursor = (BinarySearchTree*) e;
+    while (cursor->right != NULL) {
+        cursor = cursor->right;
+    }
+
+    return cursor;
 }
 
 /* constructor */
 BSTreeIterator* bstree_iterator_create(const BinarySearchTree* collection, IteratorDirection direction) {
-    (void)collection; (void)direction;
-    return NULL;
+    BSTreeIterator* it = malloc(sizeof(BSTreeIterator));
+
+    it->collection = collection;
+    it->current = NULL;
+    if (direction == forward) {
+        it->begin = goto_min;
+        it->next = bstree_successor;
+
+    } else {
+        it->begin = goto_max;
+        it->next = bstree_predecessor;
+    }   
+
+    return it;
 }
 
 /* destructor */

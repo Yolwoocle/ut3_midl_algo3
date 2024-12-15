@@ -1,22 +1,34 @@
+
 #include "bstree.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 
-/* Define this for solving the exercice 1. */
-#define EXERCICE_1
-/* Define this for solving the exercice 2. */
-#define EXERCICE_2
-/* Define this for solving the exercice 3. */
-#define EXERCICE_3
-/* Define this for solving the exercice 4. */
-#define EXERCICE_4
-/* Define this for solving the exercice 5. */
-#define EXERCICE_5
-/* Define this for solving the exercice 6. */
-#define EXERCICE_6
-/* Define this for solving the exercice 7. */
-#define EXERCICE_7
+/* Define this for solving the exercice 1 - coloring the tree. */
+//#define EXERCICE_1
+/* Define this for solving the exercice 2. - test rotations on nodes */
+//#define EXERCICE_2
+/* Define this for solving the exercice 3. - fix rb property after add*/
+//#define EXERCICE_3
+/* Define this for solving the exercice 4. - nothing to do, just to verify that search is still operational */
+//#define EXERCICE_4
+/* Define this for solving the exercice 5. - fix rb property after remove */
+//#define EXERCICE_5
+
+
+#ifdef EXERCICE_3
+#undef EXERCICE_2
+#endif
+
+/**
+ * Print the value of a node.
+ * @param t the tree node to output
+ * @param userData unused pointer.
+ */
+void print_tree(const BinarySearchTree *t, void *userData) {
+    (void) userData;
+    printf("%d ", bstree_key(t));
+}
 
 /** This function reads an int from a file with result checking */
 int read_int(FILE* input) {
@@ -29,6 +41,8 @@ int read_int(FILE* input) {
   abort();
 }
 
+
+#ifndef EXERCICE_1
 /**
  * This function output one node using the <a href="https://www.graphviz.org/documentation/">dot</a> syntax.
  * A node must defined its shape and its links to the left and righet subtrees. If one of this subtree is NULL,
@@ -36,27 +50,25 @@ int read_int(FILE* input) {
  * @dot
  * digraph node_example {
  *      node [shape = record];
- *      parent [label="bstree_parent()"]
- *      treeroot [label="{{<parent>}|root|{<left>|<right>}}"];
+ *      treeroot [label="{root|{<left>|<right>}}"];
  *      left [label="bstree_left()"];
  *      right [label="bstree_right()"];
- *      parent:s ->treeroot:parent:c [headclip=false, tailclip=false]
  *      treeroot:left:c -> left:n [headclip=false, tailclip=false]
  *      treeroot:right:c -> right:n [headclip=false, tailclip=false]
  * }
  * @enddot
  * @param t the tree node to draw.
- * @param userData the file to output the dot commands. Concretely, this parameter will be of type FILE * when the functor is called.
+ * @param stream the file to output the dot commands. Concretely, this parameter will be of type FILE * when the functor is called.
  */
-void node_to_dot(const BinarySearchTree *t, void *userData) {
-    FILE *file = (FILE *) userData;
+void node_to_dot(const BinarySearchTree *t, void *stream) {
+    FILE *file = (FILE *) stream;
 
     printf("%d ", bstree_key(t));
-    fprintf(file, "\tn%d [label=\"{{<parent>}|%d|{<left>|<right>}}\"];\n",
+    fprintf(file, "\tn%d [label=\"{%d|{<left>|<right>}}\"];\n",
             bstree_key(t), bstree_key(t));
 
     if (bstree_left(t)) {
-        fprintf(file, "\tn%d:left:c -> n%d:parent:c [headclip=false, tailclip=false]\n",
+        fprintf(file, "\tn%d:left:c -> n%d:n [headclip=false, tailclip=false]\n",
                 bstree_key(t), bstree_key(bstree_left(t)));
     } else {
         fprintf(file, "\tlnil%d [style=filled, fillcolor=grey, label=\"NIL\"];\n", bstree_key(t));
@@ -64,7 +76,7 @@ void node_to_dot(const BinarySearchTree *t, void *userData) {
                 bstree_key(t), bstree_key(t));
     }
     if (bstree_right(t)) {
-        fprintf(file, "\tn%d:right:c -> n%d:parent:c [headclip=false, tailclip=false]\n",
+        fprintf(file, "\tn%d:right:c -> n%d:n [headclip=false, tailclip=false]\n",
                 bstree_key(t), bstree_key(bstree_right(t)));
     } else {
         fprintf(file, "\trnil%d [style=filled, fillcolor=grey, label=\"NIL\"];\n", bstree_key(t));
@@ -72,15 +84,18 @@ void node_to_dot(const BinarySearchTree *t, void *userData) {
                 bstree_key(t), bstree_key(t));
     }
 }
-
+#endif
 /**
- * Print the value of a node.
- * @param t the tree node to output
- * @param userData unused pointer.
+ * Exports the tree as a graphviz file using the dot language
  */
-void print_tree(const BinarySearchTree *t, void *userData) {
-    (void) userData;
-    printf("%d ", bstree_key(t));
+void export_dot(BinarySearchTree* t, FILE* stream) {
+    fprintf(stream, "digraph RedBlackTree {\n\tgraph [ranksep=0.5];\n\tnode [shape = record];\n\n");
+    #ifdef EXERCICE_1
+    bstree_iterative_depth_infix(t, bstree_node_to_dot, stream);
+    #else
+    bstree_iterative_depth_infix(t, node_to_dot, stream);
+    #endif
+    fprintf(stream, "\n}\n");
 }
 
 /** Main function for testing the Tree implementation.
@@ -111,7 +126,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-#ifdef EXERCICE_1
+
     BinarySearchTree *theTree = bstree_create();
 
     /* Exercice 1 : add values to the BinarySearchTree */
@@ -125,26 +140,31 @@ int main(int argc, char **argv) {
     }
     printf("\nDone.\n");
 
-#ifdef EXERCICE_2
-    /* exercice 2 : recursive traversal of the tree to apply a given functor */
-    printf("Visiting the tree.");
-    printf("\n\tPrefix visitor = ");
-    bstree_depth_prefix(theTree, print_tree, NULL);
-    printf("\n\tInfix visitor = ");
-    bstree_depth_infix(theTree, print_tree, NULL);
-    printf("\n\tPostfix visitor = ");
-    bstree_depth_postfix(theTree, print_tree, NULL);
-    printf("\nDone.\n");
-
-#ifdef EXERCICE_3
-    /* Exercice 3 : iterative breadfirst and depth-first traversal of the tree to visualize the tree */
+#ifdef EXERCICE_1
+    /* Exercice 1 : exporting the colored tree */
     printf("Exporting the tree.\n\t");
-    FILE *output = fopen("thetree_0.dot", "w");
-    fprintf(output, "digraph BinarySearchTree {\n\tgraph [ranksep=0.5];\n\tnode [shape = record];\n\n");
-    bstree_iterative_breadth(theTree, node_to_dot, output);
-    fprintf(output, "\n}\n");
+    FILE *output = fopen("redblacktree_0.dot", "w");
+    export_dot(theTree, output);
     fclose(output);
     printf("\nDone.\n");
+
+#ifdef EXERCICE_2
+    /* Exercice 2 : rotate left */
+    printf("Rotating the tree left around %d.\n\t", bstree_key(theTree));
+    testrotateleft(theTree);
+    theTree = bstree_parent(theTree);
+    output = fopen("redblacktree_0_leftrotateroot.dot", "w");
+    export_dot(theTree, output);
+    fclose(output);
+    printf("Done.\n");
+
+    printf("Rotating the tree right around %d.\n\t", bstree_key(bstree_left(theTree)));
+    testrotateright(bstree_left(theTree));
+    output = fopen("redblacktree_0_rightrotateleftrotatedroot.dot", "w");
+    export_dot(theTree, output);
+    fclose(output);
+    printf("\nDone.\n");
+#endif
 
 #ifdef EXERCICE_4
     /* Exercice 4 : search for values on the tree */
@@ -152,26 +172,13 @@ int main(int argc, char **argv) {
     n = read_int(input);
     for (int i = 0; i < n; ++i) {
         int v = read_int(input);
-        const BinarySearchTree* t=bstree_search(theTree, v);
-        printf("\n\tSearching for value %d in the tree : %s", v, !bstree_empty(t) ? "true" : "false");
-        if (!bstree_empty(t)){
-            const BinarySearchTree* s = bstree_successor(t);
-            if (!bstree_empty(s))
-                printf("\n\t\t ... its successor is %d", bstree_key(s));
-            else
-                printf("\n\t\t ... its successor does not exist");
-            s = bstree_predecessor(t);
-            if (!bstree_empty(s))
-                printf("\n\t\t ... its predecessor is %d", bstree_key(s));
-            else
-                printf("\n\t\t ... its predecessor does not exist");
-        }
+        printf("\n\tSearching for value %d in the tree : %s", v, bstree_search(theTree, v) ? "true" : "false");
     }
     printf("\nDone.\n");
 
 #ifdef EXERCICE_5
     /* Exercice 5 : remove a value from the tree */
-    printf("Removing from the tree.");
+    printf("Removing from the tree."); 
     n = read_int(input);
     for (int i = 0; i < n; ++i) {
         int v = read_int(input);
@@ -181,38 +188,16 @@ int main(int argc, char **argv) {
         char filename[256];
         sprintf(filename, "thetree-%d.dot", i + 1);
         output = fopen(filename, "w");
-        fprintf(output, "digraph BinarySearchTree%d {\n\tgraph [ranksep=0.5];\n\tnode [shape = record];\n\n", i);
-        bstree_iterative_depth_infix(theTree, node_to_dot, output);
-        fprintf(output, "\n}\n");
+        export_dot(theTree, output);
         fclose(output);
     }
     printf("\nDone.\n");
+#endif
+#endif
+#endif
 
-#ifdef EXERCICE_6
-    /* Exercice 6 : Iterate in descenfing order on the tree */
-    printf("Iterate descending onto the tree.\n\tvalues : ");
-    BSTreeIterator *i = bstree_iterator_create(theTree, backward);
-    for (i = bstree_iterator_begin(i);
-         !bstree_iterator_end(i);
-         i = bstree_iterator_next(i))
-        printf("%d ", bstree_key(bstree_iterator_value(i)));
-    bstree_iterator_delete(&i);
-    printf("\nDone.\n");
-
-#ifdef EXERCICE_7
-    /* Exercice 7 : free all used memory */
-    printf("Deleting the tree.");
     bstree_delete(&theTree);
-    printf("\nDone.\n");
-#endif
-
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif //REMOVEME
-
     fclose(input);
     return 0;
 }
+
